@@ -1,31 +1,17 @@
 <template>
   <div id="home">
-    <nav-bar class="home-nav"><div slot="center">购物街</div></nav-bar>
-    <home-swiper :banners="banners"></home-swiper>
-    <home-recommend :recommend="recommend"></home-recommend>
-    <feature-view></feature-view>
-    <tab-control
-      class="tab-control"
-      :title="['流行', '新款', '精选']"
-      @tabClick="tabType"
-    ></tab-control>
-    <goods-list :goods="goods[currentType].list" ></goods-list>
-    <ul>
-      <li>erere</li>
-      <li>dfdfdfd</li>
-      <li>dfdfdfd</li>
-      <li>dfdfdfd</li>
-      <li>dfdfdfd</li>
-      <li>dfdfdfd</li>
-      <li>dfdfdfd</li>
-      <li>dfdfdfd</li>
-      <li>dfdfdfd</li>
-      <li>dfdfdfd</li>
-      <li>dfdfdfd</li>
-      <li>dfdfdfd</li>
-      <li>dfdfdfd</li>
-      <li>dfdfdfd</li>
-    </ul>
+    <nav-bar class="home-nav">
+      <div slot="center">购物街</div>
+    </nav-bar>
+    <com-scroll class="content"  ref="homescroll" :probe-type="3" @scroll="contentScroll"  :pull-up-load="true" @pullingUp="loadMore">
+      <home-swiper :banners="banners"></home-swiper>
+      <home-recommend :recommend="recommend"></home-recommend>
+      <feature-view></feature-view>
+      <tab-control class="tab-control" :title="['流行', '新款', '精选']" @tabClick="tabType"></tab-control>
+      <goods-list :goods="goods[currentType].list"></goods-list>
+    </com-scroll>
+    <!-- 添加native修饰符，监听组件根源上的原生事件 -->
+    <back-top @click.native="backClick" v-show="isShowBsckTop"></back-top>
   </div>
 </template>
 
@@ -41,6 +27,10 @@ import FeatureView from "./childComps/FeatureView";
 import TabControl from "components/content/tabcontrol/TabControl";
 import GoodsList from "components/content/goods/GoodList";
 
+import ComScroll from "components/common/scroll/ComScroll";
+import BackTop from "components/content/backtop/BackTop"
+
+
 
 export default {
   name: "Home",
@@ -50,7 +40,9 @@ export default {
     HomeRecommend,
     FeatureView,
     TabControl,
-    GoodsList
+    GoodsList,
+    ComScroll,
+    BackTop
   },
   data() {
     return {
@@ -61,7 +53,8 @@ export default {
         new: { page: 0, list: [] },
         sell: { page: 0, list: []}
       },
-      currentType:'pop'
+      currentType:'pop',
+      isShowBsckTop:false
     };
   },
   created() {
@@ -87,6 +80,8 @@ export default {
        getHomeGoods(type, page).then(res => {
         this.goods[type].list.push(...res.data.list);
         this.goods[type].page += 1;
+
+        this.$refs.homescroll.finishPullUp()
       });
     },
 
@@ -104,7 +99,22 @@ export default {
           this.currentType = 'sell'
           break;
       }
-    }          
+    },
+    backClick(){
+      //1.直接在父组件中 调用子组件中scroll的方法,scroll 指的是data中的scroll
+      //this.$refs.homescroll.scroll.scrollTo(0,0,500)
+
+      //2.调用子组件中的方法
+      this.$refs.homescroll.cScrollTo(0,0)
+    },
+    contentScroll(position){
+      //console.log(position)
+      this.isShowBsckTop = -position.y >1000? true :false
+    },
+    loadMore(){
+      console.log("上拉加载更多")
+      this.getHomeGoodsMethod(this.currentType)
+    }        
 
 
   }
@@ -113,7 +123,9 @@ export default {
 
 <style scoped>
 #home {
-  padding-top: 44px;
+  /*padding-top: 44px;*/
+  height: 100vh; 
+ position: relative;
 }
 .home-nav {
   background-color: var(--color-tint);
@@ -128,6 +140,23 @@ export default {
 .tab-control {
   position: sticky;
   top: 44px;
-  z-index:9;
+  z-index: 9;
 }
+/* 第一种方法，利用高度父100vh,  height: calc(100%-93px); */
+/* .content {
+  height: calc(100%-93px);
+  overflow: hidden;
+  margin-top:44px;
+} */
+/* 
+   第二种利用定位
+ */
+ .content{
+   position:absolute;
+   overflow: hidden;
+   top:44px;
+   bottom:49px;
+   left:0;
+   right:0;
+ }
 </style>
