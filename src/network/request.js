@@ -55,37 +55,33 @@ import qs from 'qs'
 	})
 }
  */
-import axios from 'axios'
+	import axios from 'axios';
+	
+	const baseURL = "http://123.207.32.32:8000/api/v2"
+	//const baseURL = "http://106.54.54.237:8000/api/v1"
+	
 
     export function request(config){
-        return new Promise((resolve,reject)=>{
+       // return new Promise((resolve,reject)=>{
             //1.创建啊axios 实例
             const instance1 = axios.create({
-                baseURL:'http://123.207.32.32:8000',
+				//baseURL:'http://123.207.32.32:8000',
+				baseURL:baseURL,
                 timeout:5000
             })
             //2.axios的拦截器
             instance1.interceptors.request.use((config)=>{
-                //console.log(config)
-                //1. 比如config中的一些信息不符合服务器的要求
-
-                //2.比如每次发送网络请求时，都希望在截面显示一个动画
-
-                //3.某些网络请求（比如登陆），必须携带一些特殊的信息
                 return config 
             },err=>{
-                //console.log(err)
             })
 
             instance1.interceptors.response.use((result)=>{
-                console.log(result)
                 return result.data
             },err=>{
                 console.log(err)
             })
 
-
             //3.发送真正的网络需求
-            return instance1(config)     //instance本身就是一个Promise
-        })
+            return instance1(config)     //instance本身就是一个Promise,所以不需要再在外面包一个new Promise,否则，result.data需要（reslove）
+       // })
     }
