@@ -6,7 +6,12 @@
 
 <script>
 	export default {
-		name: "Profile"
+    name: "Profile",
+    destroyed(){
+      console.log("pro destroyed")
+    },
+ 
+
 	}
 </script>
 

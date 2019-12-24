@@ -65,15 +65,19 @@
         },
         methods:{
             cScrollTo(x,y,time=300){
+                console.log("dddd",x,y,0, this.scroll)
                 //确定当scroll已经渲染完成才加载
-               this.scroll&&this.scroll.scrollTo&& this.scroll.scrollTo(x,y,time)
+               this.scroll&this.scroll.scrollTo(x,y,time)
             },
             finishPullUp(){
-                this.scroll&&this.scroll.finishPullUp&&this.scroll.finishPullUp()
+                this.scroll&&this.scroll.finishPullUp()
             },
             refresh(){
                 
-                this.scroll&&this.scroll.refresh&&this.scroll.refresh()
+                this.scroll&&this.scroll.refresh()
+            },
+            getScrollY(){
+                return this.scroll? this.scroll.y:0
             }
         }
 	}

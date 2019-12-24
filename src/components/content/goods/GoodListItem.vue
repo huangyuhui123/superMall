@@ -1,5 +1,5 @@
 <template>
-  <div class="goods-item">
+  <div class="goods-item" @click="itemClick">
     <img :src="goodsItem.show.img" alt=""  @load="imageLoad"/>
     <div class="goods-info">
       <p>{{ goodsItem.title }}</p>
@@ -25,6 +25,9 @@ export default {
       //运用事件总线来通信(兄弟组件之间/非父子组件的通信)
       
       this.$bus.$emit('itemImageLoad')
+    },
+    itemClick(){
+      this.$router.push('/detail/'+this.goodsItem.iid)
     }
   }
 };
