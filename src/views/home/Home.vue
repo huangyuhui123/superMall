@@ -28,7 +28,8 @@ import TabControl from "components/content/tabcontrol/TabControl";
 import GoodsList from "components/content/goods/GoodList";
 
 import ComScroll from "components/common/scroll/ComScroll";
-import BackTop from "components/content/backtop/BackTop"
+import BackTop from "components/content/backtop/BackTop";
+import { debounce } from "common/utils";
 
 
 
@@ -63,8 +64,19 @@ export default {
     //2请求商品数据
     this.getHomeGoodsMethod('pop');
     this.getHomeGoodsMethod('new');
-    this.getHomeGoodsMethod('sell')
-   
+    this.getHomeGoodsMethod('sell');
+  },
+  mounted(){
+      //3.监听item中组件加载完成,
+      const refresh = debounce(this.$refs.homescroll.refresh,500)
+
+      this.$bus.$on('itemImageLoad',()=>{ 
+         //没有进行防抖操作
+        // this.$refs.homescroll.refresh()
+
+        //对他进行防抖操作
+         refresh();
+      })
   },
   methods: {
     //网络请求相关方法
@@ -81,6 +93,7 @@ export default {
         this.goods[type].list.push(...res.data.list);
         this.goods[type].page += 1;
 
+        //完成上拉加载更多
         this.$refs.homescroll.finishPullUp()
       });
     },
@@ -114,7 +127,18 @@ export default {
     loadMore(){
       console.log("上拉加载更多")
       this.getHomeGoodsMethod(this.currentType)
-    }        
+    },
+    //防抖操作
+    // debounce(fun,delay){
+    //   let timer = null;
+
+    //   return function(...args){ //...args可以传入多个参数
+    //     if(timer) clearTimeout(timer);
+    //     timer = setTimeout(()=>{
+    //       fun.apply(this,args)
+    //     },delay)
+    //   }
+    // }      
 
 
   }
