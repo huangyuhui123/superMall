@@ -20,12 +20,6 @@
 import NavBar from "components/common/navbar/NavBar";
 export default {
   name: "DetailNavBar",
-  props: {
-    id: {
-      type: String,
-      default: ""
-    }
-  },
   components: {
     NavBar
   },
