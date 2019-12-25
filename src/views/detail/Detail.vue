@@ -1,13 +1,17 @@
 <template>
   <div id="detail">
-    <detail-nav-bar class="detail-nav">
+    <detail-nav-bar class="detail-nav" @titleClick="titleClick" ref="detailnav">
     </detail-nav-bar>
-    <com-scroll class="content"  ref="detailscroll">
+    <com-scroll class="content"  ref="scroll"
+      :probe-type="3" @scroll="contentScroll"
+      >
       <detail-swiper :top-images="topImages"></detail-swiper>
       <detail-base-info :goods="goods"></detail-base-info>
       <detail-shop-info :shop="shop"></detail-shop-info>
       <detail-goods-info :detailInfo="detailInfo" @imageLoad="imageLoad"></detail-goods-info>
-      <detail-param-info :paramInfo="paramInfo"></detail-param-info>
+      <detail-param-info :paramInfo="paramInfo"  ref="param"></detail-param-info>
+      <detail-comment-info :commentInfo="commentInfo" ref="comment"></detail-comment-info>
+      <good-list :goods="recommends" ref="recommend"></good-list>
     </com-scroll>
   </div>
 </template>
@@ -19,10 +23,16 @@ import DetailBaseInfo from './childComps/DetailBaseInfo'
 import DetailShopInfo from './childComps/DetailShopInfo'
 import DetailGoodsInfo from './childComps/DetailGoodsInfo'
 import DetailParamInfo from './childComps/DetailParamInfo'
+import DetailCommentInfo from './childComps/DetailCommentImfo'
 
 import ComScroll from "components/common/scroll/ComScroll";
+import GoodList from "components/content/goods/GoodList";
 
-import  {getDetail,Goods,Shop,GoodsParam} from 'network/detail'
+
+import  {getDetail,Goods,Shop,GoodsParam,getRecommend} from 'network/detail'
+
+import {debounce} from 'common/utils'
+import {itemListenerMixin} from 'common/mixin'
 	export default {
     name: "Detail",
     data(){
@@ -32,9 +42,14 @@ import  {getDetail,Goods,Shop,GoodsParam} from 'network/detail'
         goods:{},
         shop:{},
         detailInfo:{},
-        paramInfo:{}
+        paramInfo:{},
+        commentInfo:{},
+        recommends:[],
+        themeTopYs:[],
+        currentIndex:0
       }
     },
+    mixins:[itemListenerMixin],
     components:{
       DetailNavBar,
       DetailSwiper,
@@ -42,7 +57,9 @@ import  {getDetail,Goods,Shop,GoodsParam} from 'network/detail'
       DetailShopInfo,
       ComScroll,
       DetailGoodsInfo,
-      DetailParamInfo
+      DetailParamInfo,
+      DetailCommentInfo,
+      GoodList
     },
     created(){
       this.id = this.$route.params.id;
@@ -60,14 +77,61 @@ import  {getDetail,Goods,Shop,GoodsParam} from 'network/detail'
         this.detailInfo = data.detailInfo
         //5.获取参数
         this.paramInfo = new GoodsParam(data.itemParams.info, data.itemParams.rule)
+        //6.取出评论信息
+        if(data.rate.cRate!==0){
+          this.commentInfo = data.rate.list[0]
+        }
+      })
+
+      //获取推荐数据
+      getRecommend().then(res=>{
+        this.recommends= res.data.list
       })
 
       
     },
+    mounted(){
+         console.log("mounted")
+      //监听推荐组件中图片的加载完成
+      // const newRefresh = debounce(this.$refs.scroll.refresh,500)
+
+      // this.itemImgListener = ()=>{
+      //   newRefresh()
+      // }
+      // this.$bus.$on('itemImageLoad',this.itemImgListener)
+   
+    },
     methods:{
       imageLoad(){
-        this.$refs.detailscroll.refresh();
+        this.$refs.scroll.refresh();
+        this.themeTopYs=[]
+        this.themeTopYs.push(0);
+        console.log(this.$refs.param.$el.offsetTop);
+        this.themeTopYs.push(this.$refs.param.$el.offsetTop);
+        this.themeTopYs.push(this.$refs.comment.$el.offsetTop);
+        this.themeTopYs.push(this.$refs.recommend.$el.offsetTop);
+        console.log("this.themeTopYs",this.themeTopYs);
+      },
+      titleClick(index){
+         this.$refs.scroll.cScrollTo(0, -this.themeTopYs[index], 100)
+      },
+      contentScroll(position){
+        // 获取y值
+        const positionY = -position.y
+        //positiony和主题中的值进行对比
+        let length = this.themeTopYs.length;
+        for(let i = 0;i<length;i++){
+          if((this.currentIndex!==i)&&(i<length-1&& positionY>this.themeTopYs[i]&&positionY<this.themeTopYs[i+1])||(i==length-1&& positionY>this.themeTopYs[length-1])){
+              this.currentIndex = i;
+              console.log(this.currentIndex);
+              this.$refs.detailnav.currentIndex = this.currentIndex
+          }
+        }
       }
+
+    },
+    destroyed(){
+      this.$bus.$off(this.itemImgListener)
     }
  
 

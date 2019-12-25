@@ -4,7 +4,7 @@
       <div slot="center">购物街</div>
     </nav-bar>
     <tab-control class="tab-control" :title="['流行', '新款', '精选']" @tabClick="tabType" ref="tabcontrol1" v-show="isTabFixed"></tab-control>
-    <com-scroll class="content"  ref="homescroll" :probe-type="3" @scroll="contentScroll"  :pull-up-load="true" @pullingUp="loadMore">
+    <com-scroll class="content"  ref="scroll" :probe-type="3" @scroll="contentScroll"  :pull-up-load="true" @pullingUp="loadMore">
       <home-swiper :banners="banners" @swiperImageLoad="swiperImageLoad"></home-swiper>
       <home-recommend :recommend="recommend"></home-recommend>
       <feature-view></feature-view>
@@ -30,7 +30,10 @@ import GoodsList from "components/content/goods/GoodList";
 
 import ComScroll from "components/common/scroll/ComScroll";
 import BackTop from "components/content/backtop/BackTop";
+
+
 import { debounce } from "common/utils";
+import {itemListenerMixin} from 'common/mixin'
 
 
 
@@ -46,6 +49,7 @@ export default {
     ComScroll,
     BackTop
   },
+  mixins:[itemListenerMixin],
   data() {
     return {
       banners: [],
@@ -72,15 +76,18 @@ export default {
   },
   mounted(){
       //3.监听item中组件加载完成,
-      const refresh = debounce(this.$refs.homescroll.refresh,500)
+      //const refresh = debounce(this.$refs.homescroll.refresh,500)
 
-      this.$bus.$on('itemImageLoad',()=>{ 
+      //对监听的事件进行保存
+      //this.itemImgListener = ()=>{ 
          //没有进行防抖操作
         // this.$refs.homescroll.refresh()
 
         //对他进行防抖操作
-         refresh();
-      })
+         //refresh();
+      //}
+     //this.$bus.$on('itemImageLoad',this.itemImgListener)
+
 
       //获取tabControl的offsetTop，组件是不可以获取offsetTop
       //所有的组件都一个$el属性，用于获取组件中的元素
@@ -102,7 +109,7 @@ export default {
         this.goods[type].page += 1;
 
         //完成上拉加载更多
-        this.$refs.homescroll.finishPullUp()
+        this.$refs.scroll.finishPullUp()
       });
     },
 
@@ -128,8 +135,8 @@ export default {
       //this.$refs.homescroll.scroll.scrollTo(0,0,500)
 
       //2.调用子组件中的方法
-      this.$refs.homescroll.cScrollTo(0,0);
-      this.$refs.homescroll.refresh()
+      this.$refs.scroll.cScrollTo(0,0);
+      this.$refs.scroll.refresh()
     },
     contentScroll(position){
       // 1.判断backTop按钮是否显示
@@ -167,12 +174,15 @@ export default {
     console.log('home activated',this.saveY);
     this.$refs.homescroll.cScrollTo(0,this.saveY,0); 
     this.$refs.homescroll.refresh();
-  },
+  },*/
   deactivated(){
     
-    this.saveY = this.$refs.homescroll.getScrollY();
-    console.log('home deactivated',this.$refs.homescroll.getScrollY(),this.saveY)
-  }*/ 
+    //this.saveY = this.$refs.homescroll.getScrollY();
+   // console.log('home deactivated',this.$refs.homescroll.getScrollY(),this.saveY)
+
+   //取消全局事件的监听
+   this.$bus.$off(this.itemImgListener)
+  }
 };
 </script>
 
