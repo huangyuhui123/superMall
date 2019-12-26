@@ -42,7 +42,9 @@ export const BackTopMixin = {
       this.$refs.scroll.refresh()
     },
     listenershowback(position){
+      //console.log(" 我是子组件调用",position,-position.y,BACKTOP_DISTANCE)
       this.isShowBsckTop = -position.y > BACKTOP_DISTANCE
+      //console.log("this.isShowBsckTop ",this.isShowBsckTop )
     }
   }
 }

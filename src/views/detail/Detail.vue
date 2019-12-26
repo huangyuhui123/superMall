@@ -13,7 +13,9 @@
       <detail-comment-info :commentInfo="commentInfo" ref="comment"></detail-comment-info>
       <good-list :goods="recommends" ref="recommend"></good-list>
     </com-scroll>
-     <detail-bottom-bar></detail-bottom-bar>
+      <!-- 添加native修饰符，监听组件根源上的原生事件 -->
+    <back-top @click.native="backTop" v-show="isShowBsckTop"></back-top>
+     <detail-bottom-bar @addCart="addCart"></detail-bottom-bar>
   </div>
 </template>
 
@@ -71,6 +73,7 @@ import {itemListenerMixin,BackTopMixin} from 'common/mixin'
       getDetail(this.id).then(res=>{
         //获取顶部图片轮播数据
         const data = res.result
+
         this.topImages = data.itemInfo.topImages;
         //2.获取商品信息
         this.goods = new Goods(data.itemInfo,data.columns,data.shopInfo.services)
@@ -109,11 +112,11 @@ import {itemListenerMixin,BackTopMixin} from 'common/mixin'
         this.$refs.scroll.refresh();
         this.themeTopYs=[]
         this.themeTopYs.push(0);
-        console.log(this.$refs.param.$el.offsetTop);
+       // console.log(this.$refs.param.$el.offsetTop);
         this.themeTopYs.push(this.$refs.param.$el.offsetTop);
         this.themeTopYs.push(this.$refs.comment.$el.offsetTop);
         this.themeTopYs.push(this.$refs.recommend.$el.offsetTop);
-        console.log("this.themeTopYs",this.themeTopYs,Number.MAX_VALUE);
+        //console.log("this.themeTopYs",this.themeTopYs,Number.MAX_VALUE);
         this.themeTopYs.push(Number.MAX_VALUE)
       },
       titleClick(index){
@@ -124,6 +127,8 @@ import {itemListenerMixin,BackTopMixin} from 'common/mixin'
         const positionY = -position.y
         //positiony和主题中的值进行对比
         let length = this.themeTopYs.length;
+         //判断backtop是否显示
+       
         for(let i = 0;i<length;i++){
             
           // if((this.currentIndex!==i)&&(i<length-1&& positionY>this.themeTopYs[i]&&positionY<this.themeTopYs[i+1])||(i==length-1&& positionY>this.themeTopYs[length-1])){
@@ -133,9 +138,19 @@ import {itemListenerMixin,BackTopMixin} from 'common/mixin'
               this.$refs.detailnav.currentIndex = this.currentIndex
           }
         }
-
-        //判断backtop是否显示
         this.listenershowback(position);
+       
+      },
+      addCart(){
+        //获取购物车需要展示的信息
+        const product ={}
+        product.image = this.topImages[0];
+        product.title = this.goods.title;
+        product.desc = this.goods.desc;
+        product.price = this.goods.newPrice;
+        product.id = this.id
+        //2.将商品信息天骄到购物车
+        this.$store.commit('addCart',product)
       }
 
     },
