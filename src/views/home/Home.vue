@@ -12,7 +12,7 @@
       <goods-list :goods="goods[currentType].list"></goods-list>
     </com-scroll>
     <!-- 添加native修饰符，监听组件根源上的原生事件 -->
-    <back-top @click.native="backClick" v-show="isShowBsckTop"></back-top>
+    <back-top @click.native="backTop" v-show="isShowBsckTop"></back-top>
   </div>
 </template>
 
@@ -29,11 +29,9 @@ import TabControl from "components/content/tabcontrol/TabControl";
 import GoodsList from "components/content/goods/GoodList";
 
 import ComScroll from "components/common/scroll/ComScroll";
-import BackTop from "components/content/backtop/BackTop";
-
 
 import { debounce } from "common/utils";
-import {itemListenerMixin} from 'common/mixin'
+import {itemListenerMixin,BackTopMixin} from 'common/mixin'
 
 
 
@@ -46,10 +44,9 @@ export default {
     FeatureView,
     TabControl,
     GoodsList,
-    ComScroll,
-    BackTop
+    ComScroll
   },
-  mixins:[itemListenerMixin],
+  mixins:[itemListenerMixin,BackTopMixin],
   data() {
     return {
       banners: [],
@@ -73,6 +70,8 @@ export default {
     this.getHomeGoodsMethod('pop');
     this.getHomeGoodsMethod('new');
     this.getHomeGoodsMethod('sell');
+
+    console.log("home create")
   },
   mounted(){
       //3.监听item中组件加载完成,
@@ -130,20 +129,21 @@ export default {
       this.$refs.tabcontrol1.currentIndex = index;
       this.$refs.tabcontrol2.currentIndex = index;
     },
-    backClick(){
-      //1.直接在父组件中 调用子组件中scroll的方法,scroll 指的是data中的scroll
-      //this.$refs.homescroll.scroll.scrollTo(0,0,500)
+    // backTop(){
+    //   //1.直接在父组件中 调用子组件中scroll的方法,scroll 指的是data中的scroll
+    //   //this.$refs.homescroll.scroll.scrollTo(0,0,500)
 
-      //2.调用子组件中的方法
-      this.$refs.scroll.cScrollTo(0,0);
-      this.$refs.scroll.refresh()
-    },
+    //   //2.调用子组件中的方法
+    //   this.$refs.scroll.cScrollTo(0,0);
+    //   this.$refs.scroll.refresh()
+    // },
     contentScroll(position){
       // 1.判断backTop按钮是否显示
-      this.isShowBsckTop = -position.y >1000? true :false
+      // this.isShowBsckTop = -position.y >1000 
+      this.listenershowback(position);
       // 2.决定tabControl是否吸顶
       this.isTabFixed =  - position.y> this.tabOffsetTop;
-    },
+    }, 
     loadMore(){
       this.getHomeGoodsMethod(this.currentType)
     },

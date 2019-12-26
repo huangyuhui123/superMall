@@ -13,6 +13,7 @@
       <detail-comment-info :commentInfo="commentInfo" ref="comment"></detail-comment-info>
       <good-list :goods="recommends" ref="recommend"></good-list>
     </com-scroll>
+     <detail-bottom-bar></detail-bottom-bar>
   </div>
 </template>
 
@@ -24,6 +25,7 @@ import DetailShopInfo from './childComps/DetailShopInfo'
 import DetailGoodsInfo from './childComps/DetailGoodsInfo'
 import DetailParamInfo from './childComps/DetailParamInfo'
 import DetailCommentInfo from './childComps/DetailCommentImfo'
+import DetailBottomBar from './childComps/DetailBottomBar'
 
 import ComScroll from "components/common/scroll/ComScroll";
 import GoodList from "components/content/goods/GoodList";
@@ -32,7 +34,7 @@ import GoodList from "components/content/goods/GoodList";
 import  {getDetail,Goods,Shop,GoodsParam,getRecommend} from 'network/detail'
 
 import {debounce} from 'common/utils'
-import {itemListenerMixin} from 'common/mixin'
+import {itemListenerMixin,BackTopMixin} from 'common/mixin'
 	export default {
     name: "Detail",
     data(){
@@ -49,7 +51,7 @@ import {itemListenerMixin} from 'common/mixin'
         currentIndex:0
       }
     },
-    mixins:[itemListenerMixin],
+    mixins:[itemListenerMixin,BackTopMixin],
     components:{
       DetailNavBar,
       DetailSwiper,
@@ -59,7 +61,8 @@ import {itemListenerMixin} from 'common/mixin'
       DetailGoodsInfo,
       DetailParamInfo,
       DetailCommentInfo,
-      GoodList
+      GoodList,
+      DetailBottomBar
     },
     created(){
       this.id = this.$route.params.id;
@@ -110,7 +113,8 @@ import {itemListenerMixin} from 'common/mixin'
         this.themeTopYs.push(this.$refs.param.$el.offsetTop);
         this.themeTopYs.push(this.$refs.comment.$el.offsetTop);
         this.themeTopYs.push(this.$refs.recommend.$el.offsetTop);
-        console.log("this.themeTopYs",this.themeTopYs);
+        console.log("this.themeTopYs",this.themeTopYs,Number.MAX_VALUE);
+        this.themeTopYs.push(Number.MAX_VALUE)
       },
       titleClick(index){
          this.$refs.scroll.cScrollTo(0, -this.themeTopYs[index], 100)
@@ -121,12 +125,17 @@ import {itemListenerMixin} from 'common/mixin'
         //positiony和主题中的值进行对比
         let length = this.themeTopYs.length;
         for(let i = 0;i<length;i++){
-          if((this.currentIndex!==i)&&(i<length-1&& positionY>this.themeTopYs[i]&&positionY<this.themeTopYs[i+1])||(i==length-1&& positionY>this.themeTopYs[length-1])){
+            
+          // if((this.currentIndex!==i)&&(i<length-1&& positionY>this.themeTopYs[i]&&positionY<this.themeTopYs[i+1])||(i==length-1&& positionY>this.themeTopYs[length-1])){
+            if(this.currentIndex!==i && (positionY>this.themeTopYs[i]&&positionY<this.themeTopYs[i+1])){
               this.currentIndex = i;
-              console.log(this.currentIndex);
+               console.log(this.currentIndex,i);
               this.$refs.detailnav.currentIndex = this.currentIndex
           }
         }
+
+        //判断backtop是否显示
+        this.listenershowback(position);
       }
 
     },
@@ -151,7 +160,8 @@ import {itemListenerMixin} from 'common/mixin'
    background-color:#fff;
  }
  .content{
-   height: calc(100% - 44px) ;
+   background:#fff;
+   height: calc(100% - 44px - 49px) ;
  }
  
 </style>

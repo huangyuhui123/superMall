@@ -1,4 +1,7 @@
 import {debounce} from './utils'
+import BackTop from "components/content/backtop/BackTop";
+
+import {BACKTOP_DISTANCE} from 'common/const.js'
 
 export const itemListenerMixin = {
     //对象继承用混入， 类继承用extends
@@ -18,4 +21,28 @@ export const itemListenerMixin = {
 
         //console.log("事件监听混入后的方法")
       },
+}
+
+export const BackTopMixin = {
+  data(){
+    return{
+      isShowBsckTop:false
+    }
+  },
+  components:{
+    BackTop
+  },
+  methods:{
+    backTop(){
+      //1.直接在父组件中 调用子组件中scroll的方法,scroll 指的是data中的scroll
+      //this.$refs.homescroll.scroll.scrollTo(0,0,500)
+
+      //2.调用子组件中的方法
+      this.$refs.scroll.cScrollTo(0,0);
+      this.$refs.scroll.refresh()
+    },
+    listenershowback(position){
+      this.isShowBsckTop = -position.y > BACKTOP_DISTANCE
+    }
+  }
 }
