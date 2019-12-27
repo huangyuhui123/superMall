@@ -150,7 +150,8 @@ import {itemListenerMixin,BackTopMixin} from 'common/mixin'
         product.price = this.goods.newPrice;
         product.id = this.id
         //2.将商品信息天骄到购物车
-        this.$store.commit('addCart',product)
+        //this.$store.commit('addCart',product)
+        this.$store.dispatch('addCart',product)
       }
 
     },
