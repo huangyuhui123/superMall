@@ -166,13 +166,15 @@ import {mapActions} from 'vuex'
         // })
         //3.将store中的addCart映射到methdos中，用mapActions
         this.addCart(product).then(res=>{
-          this.message= res;
+          /* this.message= res;
           this.show = true;
 
           setTimeout(()=>{
             this.show= false,
             this.message = ''
-          },1000)
+          },1000) */
+          //console.log(this.$toast)
+          this.$toast.show(res,5000)
         })
       }
 
