@@ -11,3 +11,7 @@ new Vue({
   router,
   store
 }).$mount('#app')
+
+
+// const num = 10;
+// console.log(!num)

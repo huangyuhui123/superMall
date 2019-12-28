@@ -15,7 +15,7 @@
     </com-scroll>
       <!-- 添加native修饰符，监听组件根源上的原生事件 -->
     <back-top @click.native="backTop" v-show="isShowBsckTop"></back-top>
-     <detail-bottom-bar @addCart="addCart"></detail-bottom-bar>
+     <detail-bottom-bar @addCart="addCartlist"></detail-bottom-bar>
   </div>
 </template>
 
@@ -37,6 +37,9 @@ import  {getDetail,Goods,Shop,GoodsParam,getRecommend} from 'network/detail'
 
 import {debounce} from 'common/utils'
 import {itemListenerMixin,BackTopMixin} from 'common/mixin'
+
+
+import {mapActions} from 'vuex'
 	export default {
     name: "Detail",
     data(){
@@ -108,6 +111,7 @@ import {itemListenerMixin,BackTopMixin} from 'common/mixin'
    
     },
     methods:{
+      ...mapActions(['addCart']),
       imageLoad(){
         this.$refs.scroll.refresh();
         this.themeTopYs=[]
@@ -141,7 +145,7 @@ import {itemListenerMixin,BackTopMixin} from 'common/mixin'
         this.listenershowback(position);
        
       },
-      addCart(){
+      addCartlist(){
         //获取购物车需要展示的信息
         const product ={}
         product.image = this.topImages[0];
@@ -150,7 +154,15 @@ import {itemListenerMixin,BackTopMixin} from 'common/mixin'
         product.price = this.goods.newPrice;
         product.id = this.id
         //2.将商品信息天骄到购物车
-        this.$store.commit('addCart',product)
+        //this.$store.commit('addCart',product)
+        // this.$store.dispatch('addCart',product).then(res=>{
+        //   //操作完成具体的操作显示不同的提示，所以需要结合promise来根据不同的操作返回不同的提示
+        //   console.log(res)
+        // })
+        //3.将store中的addCart映射到methdos中，用mapActions
+        this.addCart(product).then(res=>{
+          console.log(res)
+        })
       }
 
     },
