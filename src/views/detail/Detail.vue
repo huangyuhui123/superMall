@@ -16,6 +16,7 @@
       <!-- 添加native修饰符，监听组件根源上的原生事件 -->
     <back-top @click.native="backTop" v-show="isShowBsckTop"></back-top>
      <detail-bottom-bar @addCart="addCartlist"></detail-bottom-bar>
+     <toast :message="message" :show="show"></toast>
   </div>
 </template>
 
@@ -31,6 +32,7 @@ import DetailBottomBar from './childComps/DetailBottomBar'
 
 import ComScroll from "components/common/scroll/ComScroll";
 import GoodList from "components/content/goods/GoodList";
+import Toast from 'components/common/toast/Toast';
 
 
 import  {getDetail,Goods,Shop,GoodsParam,getRecommend} from 'network/detail'
@@ -53,7 +55,9 @@ import {mapActions} from 'vuex'
         commentInfo:{},
         recommends:[],
         themeTopYs:[],
-        currentIndex:0
+        currentIndex:0,
+        show:false,
+        message:''
       }
     },
     mixins:[itemListenerMixin,BackTopMixin],
@@ -67,7 +71,8 @@ import {mapActions} from 'vuex'
       DetailParamInfo,
       DetailCommentInfo,
       GoodList,
-      DetailBottomBar
+      DetailBottomBar,
+      Toast
     },
     created(){
       this.id = this.$route.params.id;
@@ -161,7 +166,13 @@ import {mapActions} from 'vuex'
         // })
         //3.将store中的addCart映射到methdos中，用mapActions
         this.addCart(product).then(res=>{
-          console.log(res)
+          this.message= res;
+          this.show = true;
+
+          setTimeout(()=>{
+            this.show= false,
+            this.message = ''
+          },1000)
         })
       }
 
